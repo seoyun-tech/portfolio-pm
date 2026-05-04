@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SectionTag from '../../components/SectionTag/SectionTag';
 import IconCircle from '../../components/IconCircle/IconCircle';
 import useModalLock from '../../hooks/useModalLock';
@@ -109,6 +109,25 @@ const WorksModal = ({ works, lang, onClose }) => {
   const prev = () => setCurrent(i => (i - 1 + works.length) % works.length);
   const next = () => setCurrent(i => (i + 1) % works.length);
 
+  // 모달 열릴 때 모든 이미지 프리로드
+  useEffect(() => {
+    works.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [works]);
+
+  // 방향키 / ESC 키보드 조작
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'ArrowLeft') setCurrent(i => (i - 1 + works.length) % works.length);
+      else if (e.key === 'ArrowRight') setCurrent(i => (i + 1) % works.length);
+      else if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [works.length, onClose]);
+
   return (
     <div className="works-modal-overlay" onClick={onClose}>
       <div className="works-modal" onClick={e => e.stopPropagation()}>
@@ -118,7 +137,6 @@ const WorksModal = ({ works, lang, onClose }) => {
 
         <div className="works-modal-image-wrap">
           <img
-            key={current}
             src={works[current]}
             alt={`work-${current + 1}`}
             className="works-modal-image"
