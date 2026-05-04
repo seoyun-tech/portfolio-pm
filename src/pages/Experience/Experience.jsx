@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import SectionTag from '../../components/SectionTag/SectionTag';
+import IconCircle from '../../components/IconCircle/IconCircle';
+import useModalLock from '../../hooks/useModalLock';
 import useInView from '../../hooks/useInView';
 import { useLanguage } from '../../context/LanguageContext';
 import './Experience.css';
 
 const LABELS = {
-  ko: { sectionTag: '경력' },
-  en: { sectionTag: 'Work Experience' },
+  ko: { sectionTag: '경력', learnMore: '자세히 보기', close: '닫기', prev: '이전', next: '다음' },
+  en: { sectionTag: 'Work Experience', learnMore: 'Learn more', close: 'Close', prev: 'Prev', next: 'Next' },
 };
 
 const EXPERIENCES = {
@@ -21,6 +23,16 @@ const EXPERIENCES = {
         '상품 기획·디자인·생산 관리 및 데이터 기반 마케팅',
         '사용자 구매 패턴 분석을 통한 웹사이트 최적화',
       ],
+      works: [
+        '/assets/works/1-1.png',
+        '/assets/works/1-2.png',
+        '/assets/works/1-3.png',
+        '/assets/works/1-4.png',
+        '/assets/works/1-5.png',
+        '/assets/works/1-6.png',
+        '/assets/works/1-7.png',
+        '/assets/works/1-8.png',
+      ],
     },
     {
       company: '㈜남영비비안',
@@ -31,6 +43,16 @@ const EXPERIENCES = {
         '시즌 상품 기획 및 비주얼 촬영 디렉팅',
         '수입 브랜드 3개 총괄 바잉 및 운영 전담',
         '채널별 판매 전략 수립을 통한 목표 수익 및 매출 달성',
+      ],
+      works: [
+        '/assets/works/1.png',
+        '/assets/works/2.png',
+        '/assets/works/3.png',
+        '/assets/works/4.png',
+        '/assets/works/5.png',
+        '/assets/works/6.png',
+        '/assets/works/7.png',
+        '/assets/works/8.png',
       ],
     },
   ],
@@ -45,6 +67,16 @@ const EXPERIENCES = {
         'Managed product planning, design, and production while executing data-driven marketing strategies',
         'Optimised the website through analysis of user purchasing behaviour',
       ],
+      works: [
+        '/assets/works/1-1.png',
+        '/assets/works/1-2.png',
+        '/assets/works/1-3.png',
+        '/assets/works/1-4.png',
+        '/assets/works/1-5.png',
+        '/assets/works/1-6.png',
+        '/assets/works/1-7.png',
+        '/assets/works/1-8.png',
+      ],
     },
     {
       company: 'Namyoung Vivien Co., Ltd.',
@@ -56,16 +88,65 @@ const EXPERIENCES = {
         'Held sole responsibility for the buying and operations of three international import brands',
         'Delivered revenue and sales targets through channel-specific trading strategies',
       ],
+      works: [
+        '/assets/works/1.png',
+        '/assets/works/2.png',
+        '/assets/works/3.png',
+        '/assets/works/4.png',
+        '/assets/works/5.png',
+        '/assets/works/6.png',
+        '/assets/works/7.png',
+        '/assets/works/8.png',
+      ],
     },
   ],
+};
+
+const WorksModal = ({ works, lang, onClose }) => {
+  const [current, setCurrent] = useState(0);
+  useModalLock(onClose);
+
+  const prev = () => setCurrent(i => (i - 1 + works.length) % works.length);
+  const next = () => setCurrent(i => (i + 1) % works.length);
+
+  return (
+    <div className="works-modal-overlay" onClick={onClose}>
+      <div className="works-modal" onClick={e => e.stopPropagation()}>
+        <button className="proj-modal-close" onClick={onClose} aria-label={LABELS[lang].close}>
+          <i className="fa-solid fa-xmark" />
+        </button>
+
+        <div className="works-modal-image-wrap">
+          <img
+            key={current}
+            src={works[current]}
+            alt={`work-${current + 1}`}
+            className="works-modal-image"
+          />
+        </div>
+
+        <div className="works-modal-nav">
+          <button className="works-nav-btn" onClick={prev} aria-label={LABELS[lang].prev}>
+            <i className="fa-solid fa-chevron-left" />
+          </button>
+          <span className="works-nav-counter">{current + 1} / {works.length}</span>
+          <button className="works-nav-btn" onClick={next} aria-label={LABELS[lang].next}>
+            <i className="fa-solid fa-chevron-right" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Experience = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [animKey, setAnimKey] = useState(0);
+  const [worksOpen, setWorksOpen] = useState(false);
   const { lang } = useLanguage();
   const [ref, isVisible] = useInView();
   const experiences = EXPERIENCES[lang];
+  const activeExp = experiences[activeTab];
 
   const handleTabClick = (index) => {
     setActiveTab(index);
@@ -73,43 +154,62 @@ const Experience = () => {
   };
 
   return (
-    <section className={`experience${isVisible ? ' is-visible' : ''}`} id="experience" ref={ref}>
-      <div className="experience-container page-container">
-        <div className="experience-tag">
-          <SectionTag>{LABELS[lang].sectionTag}</SectionTag>
-        </div>
+    <>
+      <section className={`experience${isVisible ? ' is-visible' : ''}`} id="experience" ref={ref}>
+        <div className="experience-container page-container">
+          <div className="experience-tag">
+            <SectionTag>{LABELS[lang].sectionTag}</SectionTag>
+          </div>
 
-        <div className="experience-tabs">
-          <nav className="tabs-nav">
-            {experiences.map((exp, index) => (
-              <div
-                key={index}
-                className={`tab-item${activeTab === index ? ' active' : ''}`}
-                onClick={() => handleTabClick(index)}
-              >
-                {exp.company}
-              </div>
-            ))}
-          </nav>
-
-          <div className="experience-details" key={animKey}>
-            <div className="position-header">
-              <h3 className="position-title">{experiences[activeTab].role}</h3>
-              <div className="period-info">
-                <span>{experiences[activeTab].period}</span>
-                <span className="duration">({experiences[activeTab].duration})</span>
-              </div>
-            </div>
-
-            <ul className="description-list">
-              {experiences[activeTab].description.map((item, idx) => (
-                <li key={idx} className="description-item">{item}</li>
+          <div className="experience-tabs">
+            <nav className="tabs-nav">
+              {experiences.map((exp, index) => (
+                <div
+                  key={index}
+                  className={`tab-item${activeTab === index ? ' active' : ''}`}
+                  onClick={() => handleTabClick(index)}
+                >
+                  {exp.company}
+                </div>
               ))}
-            </ul>
+            </nav>
+
+            <div className="experience-details" key={animKey}>
+              <div className="position-header">
+                <h3 className="position-title">{activeExp.role}</h3>
+                <div className="period-info">
+                  <span>{activeExp.period}</span>
+                  <span className="duration">({activeExp.duration})</span>
+                </div>
+              </div>
+
+              <ul className="description-list">
+                {activeExp.description.map((item, idx) => (
+                  <li key={idx} className="description-item">{item}</li>
+                ))}
+              </ul>
+
+              {activeExp.works.length > 0 && (
+                <button className="learn-more-btn" onClick={() => setWorksOpen(true)}>
+                  <span className="learn-more-text">{LABELS[lang].learnMore}</span>
+                  <IconCircle>
+                    <i className="fa-solid fa-plus" style={{ fontSize: '12px' }} />
+                  </IconCircle>
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {worksOpen && (
+        <WorksModal
+          works={activeExp.works}
+          lang={lang}
+          onClose={() => setWorksOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
