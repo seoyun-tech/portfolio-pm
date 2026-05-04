@@ -25,8 +25,6 @@ const EXPERIENCES = {
       ],
       works: [
         '/assets/works/1-1.png',
-        '/assets/works/1-2.png',
-        '/assets/works/1-3.png',
       ],
     },
     {
